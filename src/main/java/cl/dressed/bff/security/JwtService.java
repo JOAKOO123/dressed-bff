@@ -2,10 +2,8 @@ package cl.dressed.bff.security;
 
 import cl.dressed.bff.dto.auth.LoginResponseDTO;
 import cl.dressed.bff.dto.auth.RegisterResponseDTO;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -26,37 +24,44 @@ public class JwtService {
     }
 
     public String extractEmailFromToken(String token) {
-        Claims claims = parseClaims(token);
-        // try common places
-        if (claims.get("email") != null) {
-            return claims.get("email", String.class);
-        }
-        return claims.getSubject();
-    }
-
-    public Long extractUserIdFromToken(String token) {
-        Claims claims = parseClaims(token);
-        Object id = claims.get("userId");
-        if (id == null) {
-            id = claims.get("id");
-        }
-        if (id instanceof Number) {
-            return ((Number) id).longValue();
-        }
-        if (id instanceof String) {
-            try {
-                return Long.parseLong((String) id);
-            } catch (NumberFormatException e) {
-                return null;
+        try {
+            var claims = parseClaimsMap(token);
+            if (claims.containsKey("email")) {
+                return String.valueOf(claims.get("email"));
             }
+            if (claims.containsKey("sub")) {
+                return String.valueOf(claims.get("sub"));
+            }
+        } catch (Exception e) {
+            return null;
         }
         return null;
     }
 
-    private Claims parseClaims(String token) {
-        Jws<Claims> jws = Jwts.parser()
-            .setSigningKey(Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8)))
-            .parseClaimsJws(token);
-        return jws.getBody();
+    public Long extractUserIdFromToken(String token) {
+        try {
+            var claims = parseClaimsMap(token);
+            Object id = null;
+            if (claims.containsKey("userId")) id = claims.get("userId");
+            if (id == null && claims.containsKey("id")) id = claims.get("id");
+            if (id == null && claims.containsKey("sub")) id = claims.get("sub");
+            if (id instanceof Number) return ((Number) id).longValue();
+            if (id instanceof String) {
+                try { return Long.parseLong((String) id); } catch (NumberFormatException ex) { return null; }
+            }
+        } catch (Exception e) {
+            return null;
+        }
+        return null;
+    }
+
+    private java.util.Map<String, Object> parseClaimsMap(String token) throws Exception {
+        // JWT: header.payload.signature (base64url)
+        String[] parts = token.split("\\.");
+        if (parts.length < 2) return java.util.Collections.emptyMap();
+        String payload = parts[1];
+        byte[] decoded = java.util.Base64.getUrlDecoder().decode(payload);
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readValue(decoded, new TypeReference<java.util.Map<String, Object>>(){});
     }
 }
