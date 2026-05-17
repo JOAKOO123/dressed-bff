@@ -4,12 +4,10 @@ import cl.dressed.bff.dto.auth.LoginResponseDTO;
 import cl.dressed.bff.dto.auth.RegisterResponseDTO;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Value;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import java.nio.charset.StandardCharsets;
 
 @Service
 public class JwtService {
@@ -31,9 +29,6 @@ public class JwtService {
     public String extractEmailFromToken(String token) {
         try {
             var claims = parseClaimsMap(token);
-            if (claims.containsKey("email")) {
-                return String.valueOf(claims.get("email"));
-            }
             if (claims.containsKey("sub")) {
                 return String.valueOf(claims.get("sub"));
             }
@@ -47,12 +42,12 @@ public class JwtService {
         try {
             var claims = parseClaimsMap(token);
             Object id = null;
-            if (claims.containsKey("userId")) id = claims.get("userId");
-            if (id == null && claims.containsKey("id")) id = claims.get("id");
-            if (id == null && claims.containsKey("sub")) id = claims.get("sub");
+            if (claims.containsKey("uid"))    id = claims.get("uid");
+            if (id == null && claims.containsKey("userId")) id = claims.get("userId");
+            if (id == null && claims.containsKey("id"))     id = claims.get("id");
             if (id instanceof Number) return ((Number) id).longValue();
-            if (id instanceof String) {
-                try { return Long.parseLong((String) id); } catch (NumberFormatException ex) { return null; }
+            if (id instanceof String s) {
+                try { return Long.parseLong(s); } catch (NumberFormatException ex) { return null; }
             }
         } catch (Exception e) {
             return null;
@@ -61,13 +56,11 @@ public class JwtService {
     }
 
     private java.util.Map<String, Object> parseClaimsMap(String token) throws Exception {
-        // JWT: header.payload.signature (base64url)
         String[] parts = token.split("\\.");
         if (parts.length < 2) return java.util.Collections.emptyMap();
-        String payload = parts[1];
-        byte[] decoded = java.util.Base64.getUrlDecoder().decode(payload);
+        byte[] decoded = java.util.Base64.getUrlDecoder().decode(parts[1]);
         ObjectMapper mapper = new ObjectMapper();
-        return mapper.readValue(decoded, new TypeReference<java.util.Map<String, Object>>(){});
+        return mapper.readValue(decoded, new TypeReference<java.util.Map<String, Object>>() {});
     }
 
     public String extractTokenFromCookie(HttpServletRequest request) {
