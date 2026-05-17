@@ -8,6 +8,7 @@ import cl.dressed.bff.dto.auth.RegisterResponseDTO;
 import cl.dressed.bff.dto.auth.ResetPasswordRequestDTO;
 import cl.dressed.bff.security.JwtService;
 import cl.dressed.bff.service.AuthService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -99,8 +100,8 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<LoginResponseDTO> me(
-            @CookieValue(name = "${jwt.cookie.name}", required = false) String token) {
+    public ResponseEntity<LoginResponseDTO> me(HttpServletRequest request) {
+        String token = jwtService.extractTokenFromCookie(request);
 
         if (token == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

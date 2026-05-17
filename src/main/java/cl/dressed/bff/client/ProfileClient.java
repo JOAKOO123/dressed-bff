@@ -115,6 +115,9 @@ public class ProfileClient {
                 .onStatus(HttpStatus.BAD_REQUEST::equals, response ->
                         response.bodyToMono(String.class)
                                 .map(body -> new BffException("Datos inválidos", HttpStatus.BAD_REQUEST)))
+                .onStatus(HttpStatus.INTERNAL_SERVER_ERROR::equals, response ->
+                        response.bodyToMono(String.class)
+                                .map(body -> new BffException("Estilo inválido", HttpStatus.BAD_REQUEST)))
                 .bodyToMono(StyleResponseDTO.class)
                 .block();
     }
@@ -163,6 +166,12 @@ public class ProfileClient {
                 .onStatus(HttpStatus.UNAUTHORIZED::equals, response ->
                         response.bodyToMono(String.class)
                                 .map(body -> new BffException("No autenticado", HttpStatus.UNAUTHORIZED)))
+                .onStatus(HttpStatus.NOT_FOUND::equals, response ->
+                        response.bodyToMono(String.class)
+                                .map(body -> new BffException("Medidas no encontradas", HttpStatus.NOT_FOUND)))
+                .onStatus(HttpStatus.INTERNAL_SERVER_ERROR::equals, response ->
+                        response.bodyToMono(String.class)
+                                .map(body -> new BffException("Medidas no encontradas", HttpStatus.NOT_FOUND)))
                 .bodyToMono(MeasurementResponseDTO.class)
                 .block();
     }
