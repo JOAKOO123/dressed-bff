@@ -5,6 +5,8 @@ import cl.dressed.bff.dto.auth.RegisterResponseDTO;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
@@ -14,6 +16,9 @@ public class JwtService {
 
     @Value("${jwt.secret}")
     private String jwtSecret;
+
+    @Value("${jwt.cookie.name}")
+    private String cookieName;
 
     public String extractTokenFromBackendResponse(LoginResponseDTO response) {
         return response.token();
@@ -63,5 +68,17 @@ public class JwtService {
         byte[] decoded = java.util.Base64.getUrlDecoder().decode(payload);
         ObjectMapper mapper = new ObjectMapper();
         return mapper.readValue(decoded, new TypeReference<java.util.Map<String, Object>>(){});
+    }
+
+    public String extractTokenFromCookie(HttpServletRequest request) {
+        if (request == null) return null;
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null) return null;
+        for (Cookie c : cookies) {
+            if (cookieName != null && cookieName.equals(c.getName())) {
+                return c.getValue();
+            }
+        }
+        return null;
     }
 }
