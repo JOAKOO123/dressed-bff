@@ -1,15 +1,6 @@
 package cl.dressed.bff.client;
 
-import cl.dressed.bff.dto.profile.CompletenessResponseDTO;
-import cl.dressed.bff.dto.profile.MeasurementRequestDTO;
-import cl.dressed.bff.dto.profile.MeasurementResponseDTO;
-import cl.dressed.bff.dto.profile.ProfileResponseDTO;
-import cl.dressed.bff.dto.profile.ProfileUpdateRequestDTO;
-import cl.dressed.bff.dto.profile.SizeRequestDTO;
-import cl.dressed.bff.dto.profile.SizeResponseDTO;
-import cl.dressed.bff.dto.profile.SkinUpdateRequestDTO;
-import cl.dressed.bff.dto.profile.StyleRequestDTO;
-import cl.dressed.bff.dto.profile.StyleResponseDTO;
+import cl.dressed.bff.dto.profile.*;
 import cl.dressed.bff.exception.BffException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,21 +15,17 @@ public class ProfileClient {
 
     private final WebClient backendClient;
 
-    // =============================================
-    // PROFILE
-    // =============================================
-
     public ProfileResponseDTO getProfile(String token) {
         return backendClient.get()
                 .uri("/api/users/profile")
                 .header("Authorization", "Bearer " + token)
                 .retrieve()
-                .onStatus(HttpStatus.UNAUTHORIZED::equals, response ->
-                        response.bodyToMono(String.class)
-                                .map(body -> new BffException("No autenticado", HttpStatus.UNAUTHORIZED)))
-                .onStatus(HttpStatus.NOT_FOUND::equals, response ->
-                        response.bodyToMono(String.class)
-                                .map(body -> new BffException("Perfil no encontrado", HttpStatus.NOT_FOUND)))
+                .onStatus(HttpStatus.UNAUTHORIZED::equals, r -> r.bodyToMono(String.class)
+                        .map(b -> new BffException("No autenticado", HttpStatus.UNAUTHORIZED)))
+                .onStatus(HttpStatus.NOT_FOUND::equals, r -> r.bodyToMono(String.class)
+                        .map(b -> new BffException("Perfil no encontrado", HttpStatus.NOT_FOUND)))
+                .onStatus(HttpStatus.INTERNAL_SERVER_ERROR::equals, r -> r.bodyToMono(String.class)
+                        .map(b -> new BffException("Error interno del servidor", HttpStatus.BAD_GATEWAY)))
                 .bodyToMono(ProfileResponseDTO.class)
                 .block();
     }
@@ -49,12 +36,12 @@ public class ProfileClient {
                 .header("Authorization", "Bearer " + token)
                 .bodyValue(request)
                 .retrieve()
-                .onStatus(HttpStatus.UNAUTHORIZED::equals, response ->
-                        response.bodyToMono(String.class)
-                                .map(body -> new BffException("No autenticado", HttpStatus.UNAUTHORIZED)))
-                .onStatus(HttpStatus.BAD_REQUEST::equals, response ->
-                        response.bodyToMono(String.class)
-                                .map(body -> new BffException("Datos inválidos", HttpStatus.BAD_REQUEST)))
+                .onStatus(HttpStatus.UNAUTHORIZED::equals, r -> r.bodyToMono(String.class)
+                        .map(b -> new BffException("No autenticado", HttpStatus.UNAUTHORIZED)))
+                .onStatus(HttpStatus.BAD_REQUEST::equals, r -> r.bodyToMono(String.class)
+                        .map(b -> new BffException("Datos inválidos", HttpStatus.BAD_REQUEST)))
+                .onStatus(HttpStatus.INTERNAL_SERVER_ERROR::equals, r -> r.bodyToMono(String.class)
+                        .map(b -> new BffException("Error interno del servidor", HttpStatus.BAD_GATEWAY)))
                 .bodyToMono(ProfileResponseDTO.class)
                 .block();
     }
@@ -65,12 +52,12 @@ public class ProfileClient {
                 .header("Authorization", "Bearer " + token)
                 .bodyValue(request)
                 .retrieve()
-                .onStatus(HttpStatus.UNAUTHORIZED::equals, response ->
-                        response.bodyToMono(String.class)
-                                .map(body -> new BffException("No autenticado", HttpStatus.UNAUTHORIZED)))
-                .onStatus(HttpStatus.BAD_REQUEST::equals, response ->
-                        response.bodyToMono(String.class)
-                                .map(body -> new BffException("Datos inválidos", HttpStatus.BAD_REQUEST)))
+                .onStatus(HttpStatus.UNAUTHORIZED::equals, r -> r.bodyToMono(String.class)
+                        .map(b -> new BffException("No autenticado", HttpStatus.UNAUTHORIZED)))
+                .onStatus(HttpStatus.BAD_REQUEST::equals, r -> r.bodyToMono(String.class)
+                        .map(b -> new BffException("Datos inválidos", HttpStatus.BAD_REQUEST)))
+                .onStatus(HttpStatus.INTERNAL_SERVER_ERROR::equals, r -> r.bodyToMono(String.class)
+                        .map(b -> new BffException("Error interno del servidor", HttpStatus.BAD_GATEWAY)))
                 .bodyToMono(ProfileResponseDTO.class)
                 .block();
     }
@@ -80,25 +67,23 @@ public class ProfileClient {
                 .uri("/api/users/profile/completeness")
                 .header("Authorization", "Bearer " + token)
                 .retrieve()
-                .onStatus(HttpStatus.UNAUTHORIZED::equals, response ->
-                        response.bodyToMono(String.class)
-                                .map(body -> new BffException("No autenticado", HttpStatus.UNAUTHORIZED)))
+                .onStatus(HttpStatus.UNAUTHORIZED::equals, r -> r.bodyToMono(String.class)
+                        .map(b -> new BffException("No autenticado", HttpStatus.UNAUTHORIZED)))
+                .onStatus(HttpStatus.INTERNAL_SERVER_ERROR::equals, r -> r.bodyToMono(String.class)
+                        .map(b -> new BffException("Error interno del servidor", HttpStatus.BAD_GATEWAY)))
                 .bodyToMono(CompletenessResponseDTO.class)
                 .block();
     }
-
-    // =============================================
-    // STYLES
-    // =============================================
 
     public StyleResponseDTO getStyles(String token) {
         return backendClient.get()
                 .uri("/api/users/profile/styles")
                 .header("Authorization", "Bearer " + token)
                 .retrieve()
-                .onStatus(HttpStatus.UNAUTHORIZED::equals, response ->
-                        response.bodyToMono(String.class)
-                                .map(body -> new BffException("No autenticado", HttpStatus.UNAUTHORIZED)))
+                .onStatus(HttpStatus.UNAUTHORIZED::equals, r -> r.bodyToMono(String.class)
+                        .map(b -> new BffException("No autenticado", HttpStatus.UNAUTHORIZED)))
+                .onStatus(HttpStatus.INTERNAL_SERVER_ERROR::equals, r -> r.bodyToMono(String.class)
+                        .map(b -> new BffException("Error interno del servidor", HttpStatus.BAD_GATEWAY)))
                 .bodyToMono(StyleResponseDTO.class)
                 .block();
     }
@@ -109,31 +94,25 @@ public class ProfileClient {
                 .header("Authorization", "Bearer " + token)
                 .bodyValue(request)
                 .retrieve()
-                .onStatus(HttpStatus.UNAUTHORIZED::equals, response ->
-                        response.bodyToMono(String.class)
-                                .map(body -> new BffException("No autenticado", HttpStatus.UNAUTHORIZED)))
-                .onStatus(HttpStatus.BAD_REQUEST::equals, response ->
-                        response.bodyToMono(String.class)
-                                .map(body -> new BffException("Datos inválidos", HttpStatus.BAD_REQUEST)))
-                .onStatus(HttpStatus.INTERNAL_SERVER_ERROR::equals, response ->
-                        response.bodyToMono(String.class)
-                                .map(body -> new BffException("Estilo inválido", HttpStatus.BAD_REQUEST)))
+                .onStatus(HttpStatus.UNAUTHORIZED::equals, r -> r.bodyToMono(String.class)
+                        .map(b -> new BffException("No autenticado", HttpStatus.UNAUTHORIZED)))
+                .onStatus(HttpStatus.BAD_REQUEST::equals, r -> r.bodyToMono(String.class)
+                        .map(b -> new BffException("Datos inválidos", HttpStatus.BAD_REQUEST)))
+                .onStatus(HttpStatus.INTERNAL_SERVER_ERROR::equals, r -> r.bodyToMono(String.class)
+                        .map(b -> new BffException("Error interno del servidor", HttpStatus.BAD_GATEWAY)))
                 .bodyToMono(StyleResponseDTO.class)
                 .block();
     }
-
-    // =============================================
-    // SIZES
-    // =============================================
 
     public SizeResponseDTO getSizes(String token) {
         return backendClient.get()
                 .uri("/api/users/sizes")
                 .header("Authorization", "Bearer " + token)
                 .retrieve()
-                .onStatus(HttpStatus.UNAUTHORIZED::equals, response ->
-                        response.bodyToMono(String.class)
-                                .map(body -> new BffException("No autenticado", HttpStatus.UNAUTHORIZED)))
+                .onStatus(HttpStatus.UNAUTHORIZED::equals, r -> r.bodyToMono(String.class)
+                        .map(b -> new BffException("No autenticado", HttpStatus.UNAUTHORIZED)))
+                .onStatus(HttpStatus.INTERNAL_SERVER_ERROR::equals, r -> r.bodyToMono(String.class)
+                        .map(b -> new BffException("Error interno del servidor", HttpStatus.BAD_GATEWAY)))
                 .bodyToMono(SizeResponseDTO.class)
                 .block();
     }
@@ -144,34 +123,27 @@ public class ProfileClient {
                 .header("Authorization", "Bearer " + token)
                 .bodyValue(request)
                 .retrieve()
-                .onStatus(HttpStatus.UNAUTHORIZED::equals, response ->
-                        response.bodyToMono(String.class)
-                                .map(body -> new BffException("No autenticado", HttpStatus.UNAUTHORIZED)))
-                .onStatus(HttpStatus.BAD_REQUEST::equals, response ->
-                        response.bodyToMono(String.class)
-                                .map(body -> new BffException("Datos inválidos", HttpStatus.BAD_REQUEST)))
+                .onStatus(HttpStatus.UNAUTHORIZED::equals, r -> r.bodyToMono(String.class)
+                        .map(b -> new BffException("No autenticado", HttpStatus.UNAUTHORIZED)))
+                .onStatus(HttpStatus.BAD_REQUEST::equals, r -> r.bodyToMono(String.class)
+                        .map(b -> new BffException("Datos inválidos", HttpStatus.BAD_REQUEST)))
+                .onStatus(HttpStatus.INTERNAL_SERVER_ERROR::equals, r -> r.bodyToMono(String.class)
+                        .map(b -> new BffException("Error interno del servidor", HttpStatus.BAD_GATEWAY)))
                 .bodyToMono(SizeResponseDTO.class)
                 .block();
     }
-
-    // =============================================
-    // MEASUREMENTS
-    // =============================================
 
     public MeasurementResponseDTO getMeasurements(String token) {
         return backendClient.get()
                 .uri("/api/users/proportions")
                 .header("Authorization", "Bearer " + token)
                 .retrieve()
-                .onStatus(HttpStatus.UNAUTHORIZED::equals, response ->
-                        response.bodyToMono(String.class)
-                                .map(body -> new BffException("No autenticado", HttpStatus.UNAUTHORIZED)))
-                .onStatus(HttpStatus.NOT_FOUND::equals, response ->
-                        response.bodyToMono(String.class)
-                                .map(body -> new BffException("Medidas no encontradas", HttpStatus.NOT_FOUND)))
-                .onStatus(HttpStatus.INTERNAL_SERVER_ERROR::equals, response ->
-                        response.bodyToMono(String.class)
-                                .map(body -> new BffException("Medidas no encontradas", HttpStatus.NOT_FOUND)))
+                .onStatus(HttpStatus.UNAUTHORIZED::equals, r -> r.bodyToMono(String.class)
+                        .map(b -> new BffException("No autenticado", HttpStatus.UNAUTHORIZED)))
+                .onStatus(HttpStatus.NOT_FOUND::equals, r -> r.bodyToMono(String.class)
+                        .map(b -> new BffException("Medidas no encontradas", HttpStatus.NOT_FOUND)))
+                .onStatus(HttpStatus.INTERNAL_SERVER_ERROR::equals, r -> r.bodyToMono(String.class)
+                        .map(b -> new BffException("Error interno del servidor", HttpStatus.BAD_GATEWAY)))
                 .bodyToMono(MeasurementResponseDTO.class)
                 .block();
     }
@@ -182,12 +154,12 @@ public class ProfileClient {
                 .header("Authorization", "Bearer " + token)
                 .bodyValue(request)
                 .retrieve()
-                .onStatus(HttpStatus.UNAUTHORIZED::equals, response ->
-                        response.bodyToMono(String.class)
-                                .map(body -> new BffException("No autenticado", HttpStatus.UNAUTHORIZED)))
-                .onStatus(HttpStatus.BAD_REQUEST::equals, response ->
-                        response.bodyToMono(String.class)
-                                .map(body -> new BffException("Datos inválidos", HttpStatus.BAD_REQUEST)))
+                .onStatus(HttpStatus.UNAUTHORIZED::equals, r -> r.bodyToMono(String.class)
+                        .map(b -> new BffException("No autenticado", HttpStatus.UNAUTHORIZED)))
+                .onStatus(HttpStatus.BAD_REQUEST::equals, r -> r.bodyToMono(String.class)
+                        .map(b -> new BffException("Datos inválidos", HttpStatus.BAD_REQUEST)))
+                .onStatus(HttpStatus.INTERNAL_SERVER_ERROR::equals, r -> r.bodyToMono(String.class)
+                        .map(b -> new BffException("Error interno del servidor", HttpStatus.BAD_GATEWAY)))
                 .bodyToMono(MeasurementResponseDTO.class)
                 .block();
     }
