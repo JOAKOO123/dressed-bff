@@ -122,4 +122,15 @@ public class JwtService {
         }
         return diff == 0;
     }
+
+    public String extractRoleFromToken(String token) {
+        try {
+            Map<String, Object> claims = parseClaimsMap(token);
+            Object role = claims.get("role");
+            if (role != null) return String.valueOf(role);
+        } catch (Exception e) {
+            log.debug("No se pudo extraer role del token");
+        }
+        return "user";
+    }
 }
