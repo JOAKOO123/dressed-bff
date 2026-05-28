@@ -23,14 +23,21 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .cors(cors -> { })
+            .cors(cors -> cors.configure(http))
             .csrf(csrf -> csrf.disable())
+            .headers(headers -> headers
+                .frameOptions(frame -> frame.deny())
+                .contentTypeOptions(content -> content.disable())
+                .addHeaderWriter((request, response) ->
+                    response.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups"))
+            )
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
                 .requestMatchers("/api/auth/forgot-password", "/api/auth/reset-password").permitAll()
                 .requestMatchers("/api/auth/me", "/api/auth/logout").permitAll()
+                .requestMatchers("/api/auth/google").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/catalog/products").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/catalog/products/**").permitAll()
                 .anyRequest().authenticated()
