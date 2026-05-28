@@ -9,9 +9,12 @@ import cl.dressed.bff.dto.auth.ResetPasswordRequestDTO;
 import cl.dressed.bff.exception.BffException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+
+import java.util.Map;
 
 @Slf4j
 @Component
@@ -74,6 +77,21 @@ public class AuthClient {
                         response.bodyToMono(String.class)
                                 .map(body -> new BffException("Token inválido o expirado", HttpStatus.BAD_REQUEST)))
                 .bodyToMono(Void.class)
+                .block();
+    }
+
+    public Map<String, Object> loginWithGoogle(String credential) {
+        return backendClient.post()
+                .uri("/api/auth/google")
+                .bodyValue(Map.of("credential", credential))
+                .retrieve()
+                .onStatus(HttpStatus.UNAUTHORIZED::equals, r -> r.bodyToMono(String.class)
+                        .map(b -> new BffException("Token de Google inválido", HttpStatus.UNAUTHORIZED)))
+                .onStatus(HttpStatus.BAD_REQUEST::equals, r -> r.bodyToMono(String.class)
+                        .map(b -> new BffException("Credencial inválida", HttpStatus.BAD_REQUEST)))
+                .onStatus(HttpStatus.INTERNAL_SERVER_ERROR::equals, r -> r.bodyToMono(String.class)
+                        .map(b -> new BffException("Error interno del servidor", HttpStatus.BAD_GATEWAY)))
+                .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
                 .block();
     }
 }

@@ -40,10 +40,12 @@ public class CatalogClient {
             uri.append("&sort=").append(sort);
         }
         if (size != null && !size.isBlank()) {
-            uri.append("&size=").append(size);
+            uri.append("&clothingSize=").append(size);
         }
 
-        return backendClient.get()
+        log.info("Llamando backend: {}", uri);
+
+        Map<String, Object> response = backendClient.get()
                 .uri(uri.toString())
                 .retrieve()
                 .onStatus(HttpStatus.BAD_REQUEST::equals, r -> r.bodyToMono(String.class)
@@ -51,6 +53,10 @@ public class CatalogClient {
                 .onStatus(HttpStatus.INTERNAL_SERVER_ERROR::equals, r -> r.bodyToMono(String.class)
                         .map(b -> new BffException("Error interno del servidor", HttpStatus.BAD_GATEWAY)))
                 .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
-                .block();
+            .block();
+
+        log.info("Respuesta backend catálogo: {}", response);
+
+        return response;
     }
 }
