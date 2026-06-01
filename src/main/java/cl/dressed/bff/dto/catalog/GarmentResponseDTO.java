@@ -3,6 +3,7 @@ package cl.dressed.bff.dto.catalog;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 public record GarmentResponseDTO(
         Integer id,
@@ -17,6 +18,8 @@ public record GarmentResponseDTO(
         String fit,
         String style,
         Boolean inStock,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        LocalDateTime lastUpdated,
+        Map<String, Object> attributes
 ) {
 }

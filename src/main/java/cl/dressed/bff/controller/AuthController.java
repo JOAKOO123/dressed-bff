@@ -1,6 +1,7 @@
 package cl.dressed.bff.controller;
 
 import cl.dressed.bff.dto.auth.ForgotPasswordRequestDTO;
+import cl.dressed.bff.dto.auth.GoogleAuthRequestDTO;
 import cl.dressed.bff.dto.auth.LoginRequestDTO;
 import cl.dressed.bff.dto.auth.LoginResponseDTO;
 import cl.dressed.bff.dto.auth.RegisterRequestDTO;
@@ -11,7 +12,6 @@ import cl.dressed.bff.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -19,14 +19,20 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @Slf4j
 @RestController
 @RequestMapping("/api/auth")
-@RequiredArgsConstructor
 public class AuthController {
 
     private final AuthService authService;
     private final JwtService jwtService;
+
+    public AuthController(AuthService authService, JwtService jwtService) {
+        this.authService = authService;
+        this.jwtService = jwtService;
+    }
 
     @Value("${jwt.cookie.name}")
     private String cookieName;
@@ -97,6 +103,34 @@ public class AuthController {
             @Valid @RequestBody ResetPasswordRequestDTO request) {
         authService.resetPassword(request);
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/google")
+    public ResponseEntity<?> loginWithGoogle(
+            @RequestBody GoogleAuthRequestDTO request,
+            HttpServletResponse response) {
+
+        Map<String, Object> result = authService.loginWithGoogle(request.credential());
+
+        String token = (String) result.get("token");
+        if (token != null) {
+            ResponseCookie cookie = ResponseCookie.from(cookieName, token)
+                    .httpOnly(true)
+                    .secure(false)
+                    .sameSite("Lax")
+                    .path("/")
+                    .maxAge(cookieMaxAge)
+                    .build();
+            response.addHeader("Set-Cookie", cookie.toString());
+        }
+
+        Map<String, Object> body = Map.of(
+                "id", result.getOrDefault("id", null),
+                "email", result.getOrDefault("email", ""),
+                "isNewUser", result.getOrDefault("isNewUser", false)
+        );
+
+        return ResponseEntity.ok(body);
     }
 
     @GetMapping("/me")

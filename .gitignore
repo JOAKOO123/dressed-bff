@@ -39,3 +39,5 @@ build/
 
 # Dev properties locales
 src/main/resources/application-dev.properties
+src\main\resources\application.properties
+application.properties

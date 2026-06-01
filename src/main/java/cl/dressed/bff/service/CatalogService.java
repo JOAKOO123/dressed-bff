@@ -1,7 +1,6 @@
 package cl.dressed.bff.service;
 
 import cl.dressed.bff.client.CatalogClient;
-import cl.dressed.bff.dto.catalog.GarmentResponseDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,12 +22,8 @@ public class CatalogService {
             int pageSize,
             String sort
     ) {
-        log.info("Obteniendo productos del catálogo");
+        log.info("Obteniendo productos - page={} pageSize={} category={} size={} inStock={}",
+            page, pageSize, category, size, inStock);
         return catalogClient.getProducts(category, size, inStock, page, pageSize, sort);
-    }
-
-    public GarmentResponseDTO getProductById(Integer id) {
-        log.info("Obteniendo producto id={}", id);
-        return catalogClient.getProductById(id);
     }
 }

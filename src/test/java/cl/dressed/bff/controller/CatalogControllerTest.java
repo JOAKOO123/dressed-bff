@@ -1,8 +1,6 @@
 package cl.dressed.bff.controller;
 
-import cl.dressed.bff.dto.catalog.GarmentResponseDTO;
 import cl.dressed.bff.service.CatalogService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,8 +12,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -55,23 +51,5 @@ class CatalogControllerTest {
                 .andExpect(jsonPath("$.content[0].name").value("Polera"));
 
         verify(catalogService, times(1)).getProducts(null, null, null, 0, 20, null);
-    }
-
-    @Test
-    @DisplayName("GET /api/catalog/products/{id} debería retornar 200 con prenda")
-    void getProductById_retorna200ConPrenda() throws Exception {
-        GarmentResponseDTO mock = new GarmentResponseDTO(
-                1, 2, "Polera", new BigDecimal("12990.00"),
-                "https://img", "https://product", "tops",
-                List.of("M", "L"), "negro", "regular", "casual", true,
-                LocalDateTime.now());
-        when(catalogService.getProductById(1)).thenReturn(mock);
-
-        mockMvc.perform(get("/api/catalog/products/1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.name").value("Polera"));
-
-        verify(catalogService, times(1)).getProductById(1);
     }
 }

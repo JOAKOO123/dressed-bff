@@ -1,6 +1,5 @@
 package cl.dressed.bff.controller;
 
-import cl.dressed.bff.dto.catalog.GarmentResponseDTO;
 import cl.dressed.bff.service.CatalogService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,10 +26,5 @@ public class CatalogController {
             @RequestParam(required = false) String sort
     ) {
         return ResponseEntity.ok(catalogService.getProducts(category, size, inStock, page, pageSize, sort));
-    }
-
-    @GetMapping("/products/{id}")
-    public ResponseEntity<GarmentResponseDTO> getProductById(@PathVariable Integer id) {
-        return ResponseEntity.ok(catalogService.getProductById(id));
     }
 }
