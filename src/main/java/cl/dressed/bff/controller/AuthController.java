@@ -134,17 +134,23 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<LoginResponseDTO> me(HttpServletRequest request) {
+    public ResponseEntity<Map<String, Object>> me(HttpServletRequest request) {
         String token = jwtService.extractTokenFromCookie(request);
 
-        if (token == null) {
+        if (token == null || !jwtService.isTokenValid(token)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         String email = jwtService.extractEmailFromToken(token);
         Long userId = jwtService.extractUserIdFromToken(token);
+        String role = jwtService.extractRoleFromToken(token);
 
-        return ResponseEntity.ok(new LoginResponseDTO(userId, email, true, token));
+        return ResponseEntity.ok(Map.of(
+                "id", userId,
+                "email", email,
+                "role", role,
+                "active", true
+        ));
     }
 
     private void addAuthCookie(HttpServletResponse response, String token) {

@@ -41,6 +41,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/contact").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/catalog/products").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/catalog/products/**").permitAll()
+                .requestMatchers("/api/admin/**").authenticated()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
